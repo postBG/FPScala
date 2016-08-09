@@ -1,0 +1,12 @@
+compile
+import example.Lists._
+console
+exit
+console
+compile
+submit profile2697@gmail.com 0tKRDx9zRTzXfbGi
+compile
+sbt test
+compile
+build
+sbt test
