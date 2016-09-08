@@ -79,4 +79,26 @@ class CalculatorSuite extends FunSuite with ShouldMatchers {
     c() = 25.0
     assert(Set() == result())
   }
+
+  test("test computeValues ok") {
+    val equations: Map[String, Signal[Expr]] = Map("a" -> Signal(Ref("b")), "b" -> Signal(Literal(2)))
+    val maybeSignal: Option[Signal[Double]] = Calculator.computeValues(equations).get("a")
+    val answer = maybeSignal match {
+      case Some(exp) => exp()
+      case _ => Double.NaN
+    }
+
+    assert(2.0 == answer)
+  }
+
+  test("test computeValues fail") {
+    val equations: Map[String, Signal[Expr]] = Map("a" -> Signal(Ref("b")), "b" -> Signal(Ref("c")), "c" -> Signal(Ref("a")))
+    val maybeSignal: Option[Signal[Double]] = Calculator.computeValues(equations).get("a")
+    val answer = maybeSignal match {
+      case Some(exp) => exp()
+      case _ => new Exception
+    }
+
+    assert(answer equals Double.NaN)
+  }
 }
