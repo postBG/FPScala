@@ -43,34 +43,65 @@ object ParallelParenthesesBalancing {
    */
   def balance(chars: Array[Char]): Boolean = {
     @tailrec
-    def loop(chars: List[Char], p: List[Char]): Boolean = {
-      chars match {
-        case Nil => p.isEmpty
-        case head :: tail =>
-          if (head == '(') loop(tail, p :+ head)
-          else if (head == ')')
-            if (p.isEmpty) false
-            else loop(tail, p.tail)
-          else loop(tail, p)
+    def loop(idx: Int, until: Int, count: Int): Boolean = {
+      if (idx == until) count == 0
+      else{
+        val c = chars(idx)
+
+        if (c == '(') loop(idx + 1, until, count + 1)
+        else if (c == ')')
+          if (count <= 0) false
+          else loop(idx + 1, until, count - 1)
+        else loop(idx + 1, until, count)
       }
     }
 
-    loop(chars.toList, List())
+    loop(0, chars.length, 0)
   }
 
   /** Returns `true` iff the parentheses in the input `chars` are balanced.
    */
   def parBalance(chars: Array[Char], threshold: Int): Boolean = {
 
-    def traverse(idx: Int, until: Int, arg1: Int, arg2: Int) /*: ???*/ = {
-      ???
+    def traverse(idx: Int, until: Int): (Int, Int) = {
+      var right = 0
+      var left = 0
+
+      var i = idx
+      while(i < until){
+        val c = chars(i)
+
+        if (c == '(') left += 1
+        else if (c == ')'){
+          if(left > 0) left -= 1
+          else right += 1
+        }
+
+        i += 1
+      }
+
+      (right, left)
     }
 
-    def reduce(from: Int, until: Int) /*: ???*/ = {
-      ???
+    def reduce(from: Int, until: Int): (Int, Int) = {
+      if(until - from <= threshold) traverse(from, until)
+      else {
+        val mid = from + (until - from) / 2
+        val (p1, p2) = parallel(reduce(from, mid), reduce(mid, until))
+
+        mergePairs(p1, p2)
+      }
     }
 
-    reduce(0, chars.length) == ???
+    reduce(0, chars.length) == (0, 0)
+  }
+
+  def mergePairs(p1: (Int, Int), p2: (Int, Int)): (Int, Int) = {
+    val (r1, l1) = p1
+    val (r2, l2) = p2
+
+    if(l1 > r2) (r1, l1 - r2 + l2)
+    else (r1 + r2 - l1, l2)
   }
 
   // For those who want more:
