@@ -1,6 +1,8 @@
 import common._
 import barneshut.conctrees._
 
+import scala.annotation.tailrec
+
 package object barneshut {
 
   class Boundaries {
@@ -52,7 +54,7 @@ package object barneshut {
 
     def total: Int = 0
 
-    def insert(b: Body): Quad = new Leaf(this.centerX, this.centerY, this.size, Seq(b))
+    def insert(b: Body): Quad = Leaf(this.centerX, this.centerY, this.size, Seq(b))
   }
 
   case class Fork(
@@ -62,21 +64,46 @@ package object barneshut {
     val centerY: Float = nw.centerY + (nw.size / 2)
     val size: Float = nw.size * 2
     val mass: Float = nw.mass + ne.mass + sw.mass + se.mass
-    val massX: Float = (nw.mass * nw.massX + ne.mass * ne.massX + sw.mass * sw.massX + se.mass * se.massX) / mass
-    val massY: Float = (nw.mass * nw.massY + ne.mass * ne.massY + sw.mass * sw.massY + se.mass * se.massY) / mass
+    val massX: Float = if (mass != 0) (nw.mass * nw.massX + ne.mass * ne.massX + sw.mass * sw.massX + se.mass * se.massX) / mass else centerX
+    val massY: Float = if (mass != 0) (nw.mass * nw.massY + ne.mass * ne.massY + sw.mass * sw.massY + se.mass * se.massY) / mass else centerY
     val total: Int = nw.total + ne.total + sw.total + se.total
 
     def insert(b: Body): Fork = {
-      new Fork(nw.insert(b), ne.insert(b), sw.insert(b), se.insert(b))
+      val x = b.x
+      val y = b.y
+
+      if (x < centerX) {
+        if (y < centerY) Fork(nw.insert(b), ne, sw, se)
+        else Fork(nw, ne, sw.insert(b), se)
+      }
+      else {
+        if (y < centerY) Fork(nw, ne.insert(b), sw, se)
+        else Fork(nw, ne, sw, se.insert(b))
+      }
     }
   }
 
   case class Leaf(centerX: Float, centerY: Float, size: Float, bodies: Seq[Body])
     extends Quad {
-    val (mass, massX, massY) = (??? : Float, ??? : Float, ??? : Float)
-    val total: Int = ???
+    val mass = bodies.foldLeft(0f)((sum, body) => sum + body.mass)
+    val massX = if (mass != 0) bodies.foldLeft(0f)((sum, body) => sum + body.mass * body.x) / mass else centerX
+    val massY = if (mass != 0) bodies.foldLeft(0f)((sum, body) => sum + body.mass * body.y) / mass else centerY
+    val total: Int = bodies.size
 
-    def insert(b: Body): Quad = ???
+    def insert(b: Body): Quad = {
+      if (size <= minimumSize) Leaf(centerX, centerY, size, bodies :+ b)
+      else {
+        val newSize = size / 2
+        val centerDist = size / 4
+
+        val nw = Empty(centerX - centerDist, centerY - centerDist, newSize)
+        val ne = Empty(centerX + centerDist, centerY - centerDist, newSize)
+        val sw = Empty(centerX - centerDist, centerY + centerDist, newSize)
+        val se = Empty(centerX + centerDist, centerY + centerDist, newSize)
+
+        bodies.foldLeft(Fork(nw, ne, sw, se))((newFork, body) => newFork.insert(body))
+      }
+    }
   }
 
   def minimumSize = 0.00001f
