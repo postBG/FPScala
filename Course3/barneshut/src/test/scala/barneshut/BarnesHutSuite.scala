@@ -75,7 +75,7 @@ class BarnesHutSuite extends FunSuite {
     }
   }
 
-  /*// test cases for Body
+  // test cases for Body
 
   test("Body.updated should do nothing for Empty quad trees") {
     val b1 = new Body(123f, 18f, 26f, 0f, 0f)
@@ -98,7 +98,7 @@ class BarnesHutSuite extends FunSuite {
     assert(body.yspeed ~= 0.015557117f)
   }
 
-  // test cases for sector matrix
+  /*// test cases for sector matrix
 
   test("'SectorMatrix.+=' should add a body at (25,47) to the correct bucket of a sector matrix of size 96") {
     val body = new Body(5, 25, 47, 0.1f, 0.1f)
