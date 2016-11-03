@@ -155,6 +155,14 @@ class BarnesHutSuite extends FunSuite {
     }
   }
 
+  test("'insert' should work correctly on a leaf with center (1,1) and size 2") {
+    val b = new Body(120f, 0.2f, 0.8f, 0f, 0f)
+    val leaf = Leaf(1f, 1f, 2f, Seq(b))
+
+    val nb = new Body(120f, 1.3f, 0.8f, 0f, 0f)
+    println(leaf.insert(nb))
+  }
+
   // test cases for Body
 
   test("Body.updated should do nothing for Empty quad trees") {

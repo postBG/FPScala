@@ -72,12 +72,12 @@ package object barneshut {
       val x = b.x
       val y = b.y
 
-      if (x < centerX) {
-        if (y < centerY) Fork(nw.insert(b), ne, sw, se)
+      if (x <= centerX) {
+        if (y <= centerY) Fork(nw.insert(b), ne, sw, se)
         else Fork(nw, ne, sw.insert(b), se)
       }
       else {
-        if (y < centerY) Fork(nw, ne.insert(b), sw, se)
+        if (y <= centerY) Fork(nw, ne.insert(b), sw, se)
         else Fork(nw, ne, sw, se.insert(b))
       }
     }
@@ -101,7 +101,8 @@ package object barneshut {
         val sw = Empty(centerX - centerDist, centerY + centerDist, newSize)
         val se = Empty(centerX + centerDist, centerY + centerDist, newSize)
 
-        bodies.foldLeft(Fork(nw, ne, sw, se))((newFork, body) => newFork.insert(body))
+        val nfork = bodies.foldLeft(Fork(nw, ne, sw, se))((newFork, body) => newFork.insert(body))
+        nfork.insert(b)
       }
     }
   }
