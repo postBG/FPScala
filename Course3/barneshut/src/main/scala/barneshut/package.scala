@@ -158,7 +158,10 @@ package object barneshut {
         case Fork(nw, ne, sw, se) =>
           if(quad.size / distance(quad.massX, quad.massY, x, y) < theta) addForce(quad.mass, quad.massX, quad.massY)
           else {
-            parallel(traverse(nw), traverse(ne), traverse(sw), traverse(se))
+            traverse(nw)
+            traverse(ne)
+            traverse(sw)
+            traverse(se)
           }
         // see if node is far enough from the body,
         // or recursion is needed
@@ -184,14 +187,29 @@ package object barneshut {
     for (i <- 0 until matrix.length) matrix(i) = new ConcBuffer
 
     def +=(b: Body): SectorMatrix = {
-      ???
+      var x_idx = ((b.x - boundaries.minX) / sectorSize).toInt
+      var y_idx = ((b.y - boundaries.minY) / sectorSize).toInt
+
+      if(b.x < boundaries.minX) x_idx = 0
+      else if(b.x > boundaries.maxX) x_idx = sectorPrecision - 1
+
+      if(b.y < boundaries.minY) y_idx = 0
+      else if(b.y > boundaries.maxY) y_idx = sectorPrecision - 1
+
+      apply(x_idx, y_idx) += b
       this
     }
 
     def apply(x: Int, y: Int) = matrix(y * sectorPrecision + x)
 
     def combine(that: SectorMatrix): SectorMatrix = {
-      ???
+      val newSectorMatrix = new SectorMatrix(boundaries, sectorPrecision)
+
+      for(i <- 0 until sectorPrecision * sectorPrecision){
+        newSectorMatrix.matrix(i) = this.matrix(i) combine that.matrix(i)
+      }
+
+      newSectorMatrix
     }
 
     def toQuad(parallelism: Int): Quad = {

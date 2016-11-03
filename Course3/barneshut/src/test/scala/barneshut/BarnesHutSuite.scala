@@ -60,6 +60,86 @@ class BarnesHutSuite extends FunSuite {
     assert(quad.total == 1, s"${quad.total} should be 1")
   }
 
+  test("insert to Fork nw") {
+    val b = new Body(123f, 18f, 26f, 0f, 0f)
+
+    val nw = Empty(17.5f, 27.5f, 5f)
+    val ne = Empty(22.5f, 27.5f, 5f)
+    val sw = Empty(17.5f, 32.5f, 5f)
+    val se = Empty(22.5f, 32.5f, 5f)
+    val emptyQuad = Fork(nw, ne, sw, se)
+
+    val quad = emptyQuad.insert(b)
+    assert(quad.centerX == 20f, s"${quad.centerX} should be 20f")
+    assert(quad.centerY == 30f, s"${quad.centerY} should be 30f")
+    assert(quad.mass ~= 123f, s"${quad.mass} should be 123f")
+    assert(quad.massX ~= 18f, s"${quad.massX} should be 18f")
+    assert(quad.massY ~= 26f, s"${quad.massY} should be 26f")
+    assert(quad.total == 1, s"${quad.total} should be 1")
+
+    assert(quad.nw.mass ~= 123f)
+  }
+
+  test("insert to Fork ne") {
+    val b = new Body(123f, 21f, 26f, 0f, 0f)
+
+    val nw = Empty(17.5f, 27.5f, 5f)
+    val ne = Empty(22.5f, 27.5f, 5f)
+    val sw = Empty(17.5f, 32.5f, 5f)
+    val se = Empty(22.5f, 32.5f, 5f)
+    val emptyQuad = Fork(nw, ne, sw, se)
+
+    val quad = emptyQuad.insert(b)
+    assert(quad.centerX == 20f, s"${quad.centerX} should be 20f")
+    assert(quad.centerY == 30f, s"${quad.centerY} should be 30f")
+    assert(quad.mass ~= 123f, s"${quad.mass} should be 123f")
+    assert(quad.massX ~= 21f, s"${quad.massX} should be 18f")
+    assert(quad.massY ~= 26f, s"${quad.massY} should be 26f")
+    assert(quad.total == 1, s"${quad.total} should be 1")
+
+    assert(quad.ne.mass ~= 123f)
+  }
+
+  test("insert to Fork sw") {
+    val b = new Body(123f, 18f, 34f, 0f, 0f)
+
+    val nw = Empty(17.5f, 27.5f, 5f)
+    val ne = Empty(22.5f, 27.5f, 5f)
+    val sw = Empty(17.5f, 32.5f, 5f)
+    val se = Empty(22.5f, 32.5f, 5f)
+    val emptyQuad = Fork(nw, ne, sw, se)
+
+    val quad = emptyQuad.insert(b)
+    assert(quad.centerX == 20f, s"${quad.centerX} should be 20f")
+    assert(quad.centerY == 30f, s"${quad.centerY} should be 30f")
+    assert(quad.mass ~= 123f, s"${quad.mass} should be 123f")
+    assert(quad.massX ~= 18f, s"${quad.massX} should be 18f")
+    assert(quad.massY ~= 34f, s"${quad.massY} should be 26f")
+    assert(quad.total == 1, s"${quad.total} should be 1")
+
+    assert(quad.sw.mass ~= 123f)
+  }
+
+  test("insert to Fork se") {
+    val b = new Body(123f, 21f, 34f, 0f, 0f)
+
+    val nw = Empty(17.5f, 27.5f, 5f)
+    val ne = Empty(22.5f, 27.5f, 5f)
+    val sw = Empty(17.5f, 32.5f, 5f)
+    val se = Empty(22.5f, 32.5f, 5f)
+    val emptyQuad = Fork(nw, ne, sw, se)
+
+    val quad = emptyQuad.insert(b)
+    assert(quad.centerX == 20f, s"${quad.centerX} should be 20f")
+    assert(quad.centerY == 30f, s"${quad.centerY} should be 30f")
+    assert(quad.mass ~= 123f, s"${quad.mass} should be 123f")
+    assert(quad.massX ~= 21f, s"${quad.massX} should be 18f")
+    assert(quad.massY ~= 34f, s"${quad.massY} should be 26f")
+    assert(quad.total == 1, s"${quad.total} should be 1")
+
+    assert(quad.se.mass ~= 123f)
+  }
+
   test("Empty.insert(b) should return a Leaf with only that body") {
     val quad = Empty(51f, 46.3f, 5f)
     val b = new Body(3f, 54f, 46f, 0f, 0f)
@@ -98,7 +178,7 @@ class BarnesHutSuite extends FunSuite {
     assert(body.yspeed ~= 0.015557117f)
   }
 
-  /*// test cases for sector matrix
+  // test cases for sector matrix
 
   test("'SectorMatrix.+=' should add a body at (25,47) to the correct bucket of a sector matrix of size 96") {
     val body = new Body(5, 25, 47, 0.1f, 0.1f)
@@ -111,7 +191,60 @@ class BarnesHutSuite extends FunSuite {
     sm += body
     val res = sm(2, 3).size == 1 && sm(2, 3).find(_ == body).isDefined
     assert(res, s"Body not found in the right sector")
-  }*/
+  }
+
+  test("+= x out of minX") {
+    val body = new Body(5, -1, 47, 0.1f, 0.1f)
+    val boundaries = new Boundaries()
+    boundaries.minX = 1
+    boundaries.minY = 1
+    boundaries.maxX = 97
+    boundaries.maxY = 97
+    val sm = new SectorMatrix(boundaries, SECTOR_PRECISION)
+    sm += body
+    val res = sm(0, 3).size == 1 && sm(0, 3).find(_ == body).isDefined
+    assert(res, s"Body not found in the right sector")
+  }
+
+  test("+= x out of maxX") {
+    val body = new Body(5, 100, 47, 0.1f, 0.1f)
+    val boundaries = new Boundaries()
+    boundaries.minX = 1
+    boundaries.minY = 1
+    boundaries.maxX = 97
+    boundaries.maxY = 97
+    val sm = new SectorMatrix(boundaries, SECTOR_PRECISION)
+    sm += body
+    val res = sm(7, 3).size == 1 && sm(7, 3).find(_ == body).isDefined
+    assert(res, s"Body not found in the right sector")
+  }
+
+  test("+= y out of minY") {
+    val body = new Body(5, 25, -1, 0.1f, 0.1f)
+    val boundaries = new Boundaries()
+    boundaries.minX = 1
+    boundaries.minY = 1
+    boundaries.maxX = 97
+    boundaries.maxY = 97
+    val sm = new SectorMatrix(boundaries, SECTOR_PRECISION)
+    sm += body
+    val res = sm(2, 0).size == 1 && sm(2, 0).find(_ == body).isDefined
+    assert(res, s"Body not found in the right sector")
+  }
+
+  test("+= y out of maxY") {
+    val body = new Body(5, 25, 100, 0.1f, 0.1f)
+    val boundaries = new Boundaries()
+    boundaries.minX = 1
+    boundaries.minY = 1
+    boundaries.maxX = 97
+    boundaries.maxY = 97
+    val sm = new SectorMatrix(boundaries, SECTOR_PRECISION)
+    sm += body
+    val res = sm(2, 7).size == 1 && sm(2, 7).find(_ == body).isDefined
+    assert(res, s"Body not found in the right sector")
+  }
+
 
 }
 
