@@ -245,7 +245,9 @@ class BarnesHutSuite extends FunSuite {
     assert(res, s"Body not found in the right sector")
   }
 
+  test("combine test") {
 
+  }
 }
 
 object FloatOps {
